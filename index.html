@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>肝病风险评估计算器</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 10px;
+            background-color: #FFF5E6;
+            color: #5D3A1A;
+        }
+        h1 {
+            text-align: center;
+            color: #8B5A2B;
+            font-size: 1.5rem;
+            margin: 10px 0;
+        }
+        .tab-container {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 5px;
+            gap: 5px;
+        }
+        .tab {
+            padding: 8px 12px;
+            background-color: #FFEEDD;
+            border: 1px solid #8B5A2B;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            flex-grow: 1;
+            text-align: center;
+        }
+        .tab.active {
+            background-color: #8B5A2B;
+            color: white;
+        }
+        .panel {
+            display: none;
+            padding: 20px;
+            background-color: #FFEEDD;
+            border: 1px solid #8B5A2B;
+            border-radius: 0 5px 5px 5px;
+        }
+        .panel.active {
+            display: block;
+        }
+        .panel {
+            display: none;
+            padding: 15px;
+            background-color: #FFEEDD;
+            border: 1px solid #8B5A2B;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+        .form-group {
+            margin-bottom: 12px;
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        input {
+            padding: 8px;
+            border: 1px solid #B38B6D;
+            border-radius: 5px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 10px;
+            background-color: #8B5A2B;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 1rem;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #A67C52;
+        }
+        #result {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #FFF9F0;
+            border: 1px solid #B38B6D;
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+        @media (min-width: 768px) {
+            body {
+                max-width: 800px;
+                padding: 20px;
+            }
+            .form-group {
+                flex-direction: row;
+                align-items: center;
+            }
+            label {
+                width: 150px;
+                margin-right: 10px;
+                margin-bottom: 0;
+            }
+            input {
+                width: 120px;
+            }
+            button {
+                width: auto;
+                padding: 8px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>肝病风险评估计算器</h1>
+    
+    <div class="tab-container">
+        <div class="tab active" data-tab="fli">脂肪肝指数(FLI)</div>
+        <div class="tab" data-tab="nfs">NFS评分</div>
+        <div class="tab" data-tab="fib4">FIB-4评分</div>
+        <div class="tab" data-tab="ani">ANI评分</div>
+        <div class="tab" data-tab="asap">ASAP/GALAD</div>
+    </div>
+    
+    <!-- FLI Panel -->
+    <div class="panel active" id="fli-panel">
+        <h2>脂肪肝指数(FLI)计算</h2>
+        <div class="form-group">
+            <label for="fli-height">身高(cm):</label>
+            <input type="number" id="fli-height">
+        </div>
+        <div class="form-group">
+            <label for="fli-weight">体重(kg):</label>
+            <input type="number" id="fli-weight">
+        </div>
+        <div class="form-group">
+            <label for="fli-trig">甘油三酯(mmol/L):</label>
+            <input type="number" id="fli-trig" step="0.01">
+        </div>
+        <div class="form-group">
+            <label for="fli-ggt">GGT(U/L):</label>
+            <input type="number" id="fli-ggt">
+        </div>
+        <div class="form-group">
+            <label for="fli-waist">腰围(cm):</label>
+            <input type="number" id="fli-waist">
+        </div>
+        <button id="calculate-fli">计算FLI</button>
+        <div id="fli-result"></div>
+    </div>
+    
+    <!-- NFS Panel -->
+    <div class="panel" id="nfs-panel">
+        <h2>NAFLD纤维化评分(NFS)</h2>
+        <div class="form-group">
+            <label for="nfs-age">年龄(岁):</label>
+            <input type="number" id="nfs-age">
+        </div>
+        <div class="form-group">
+            <label for="nfs-height">身高(cm):</label>
+            <input type="number" id="nfs-height">
+        </div>
+        <div class="form-group">
+            <label for="nfs-weight">体重(kg):</label>
+            <input type="number" id="nfs-weight">
+        </div>
+        <div class="form-group">
+            <label>IFG/糖尿病:</label>
+            <input type="radio" name="diabetes" id="diabetes-yes" value="yes">
+            <label for="diabetes-yes" style="width:auto">是</label>
+            <input type="radio" name="diabetes" id="diabetes-no" value="no" checked>
+            <label for="diabetes-no" style="width:auto">否</label>
+        </div>
+        <div class="form-group">
+            <label for="nfs-ast">AST(U/L):</label>
+            <input type="number" id="nfs-ast">
+        </div>
+        <div class="form-group">
+            <label for="nfs-alt">ALT(U/L):</label>
+            <input type="number" id="nfs-alt">
+        </div>
+        <div class="form-group">
+            <label for="nfs-platelet">血小板(×10⁹/L):</label>
+            <input type="number" id="nfs-platelet">
+        </div>
+        <div class="form-group">
+            <label for="nfs-albumin">血清白蛋白(g/L):</label>
+            <input type="number" id="nfs-albumin" step="0.1">
+        </div>
+        <button id="calculate-nfs">计算NFS</button>
+        <div id="nfs-result"></div>
+    </div>
+    
+    <!-- ANI Panel -->
+    <div class="panel" id="ani-panel">
+        <h2>ANI评分计算</h2>
+        <div class="form-group">
+            <label for="ani-height">身高(cm):</label>
+            <input type="number" id="ani-height">
+        </div>
+        <div class="form-group">
+            <label for="ani-weight">体重(kg):</label>
+            <input type="number" id="ani-weight">
+        </div>
+        <div class="form-group">
+            <label>性别:</label>
+            <input type="radio" name="gender" id="gender-male" value="male" checked>
+            <label for="gender-male" style="width:auto">男性</label>
+            <input type="radio" name="gender" id="gender-female" value="female">
+            <label for="gender-female" style="width:auto">女性</label>
+        </div>
+        <div class="form-group">
+            <label for="ani-mcv">MCV(fL):</label>
+            <input type="number" id="ani-mcv" step="0.1">
+        </div>
+        <div class="form-group">
+            <label for="ani-ast">AST(U/L):</label>
+            <input type="number" id="ani-ast">
+        </div>
+        <div class="form-group">
+            <label for="ani-alt">ALT(U/L):</label>
+            <input type="number" id="ani-alt">
+        </div>
+        <button id="calculate-ani">计算ANI</button>
+        <div id="ani-result"></div>
+    </div>
+    
+    <!-- ASAP/GALAD Panel -->
+    <div class="panel" id="asap-panel">
+        <h2>ASAP/GALAD评分计算</h2>
+        <div class="form-group">
+            <label for="asap-age">年龄(岁):</label>
+            <input type="number" id="asap-age">
+        </div>
+        <div class="form-group">
+            <label>性别:</label>
+            <input type="radio" name="asap-gender" id="asap-gender-male" value="male" checked>
+            <label for="asap-gender-male" style="width:auto">男性</label>
+            <input type="radio" name="asap-gender" id="asap-gender-female" value="female">
+            <label for="asap-gender-female" style="width:auto">女性</label>
+        </div>
+        <div class="form-group">
+            <label for="asap-afp">AFP(ng/mL):</label>
+            <input type="number" id="asap-afp" step="0.1">
+        </div>
+        <div class="form-group">
+            <label for="asap-pivka">PIVKA-II(mAU/mL):</label>
+            <input type="number" id="asap-pivka">
+        </div>
+        <div class="form-group">
+            <label for="asap-afpl3">AFP-L3%(可选):</label>
+            <input type="number" id="asap-afpl3" step="0.1">
+        </div>
+        <button id="calculate-asap">计算ASAP</button>
+        <button id="calculate-galad">计算GALAD</button>
+        <div id="asap-result"></div>
+    </div>
+
+    <!-- FIB-4 Panel -->
+    <div class="panel" id="fib4-panel">
+        <h2>FIB-4评分计算</h2>
+        <div class="form-group">
+            <label for="fib4-age">年龄(岁):</label>
+            <input type="number" id="fib4-age">
+        </div>
+        <div class="form-group">
+            <label for="fib4-ast">AST(U/L):</label>
+            <input type="number" id="fib4-ast">
+        </div>
+        <div class="form-group">
+            <label for="fib4-alt">ALT(U/L):</label>
+            <input type="number" id="fib4-alt">
+        </div>
+        <div class="form-group">
+            <label for="fib4-platelet">血小板(×10⁹/L):</label>
+            <input type="number" id="fib4-platelet">
+        </div>
+        <button id="calculate-fib4">计算FIB-4</button>
+        <div id="fib4-result"></div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
